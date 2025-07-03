@@ -125,55 +125,6 @@
             align-items: center;
         }
         
-        .explanation {
-            background-color: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 15px;
-        }
-        
-        .explanation h3 {
-            color: #1d3557;
-            margin-bottom: 12px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .explanation h3::before {
-            content: "📊";
-            font-size: 1.5rem;
-        }
-        
-        .explanation p {
-            line-height: 1.6;
-            margin-bottom: 10px;
-            font-size: 1.05rem;
-        }
-        
-        .condition-list {
-            padding-left: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 15px;
-        }
-        
-        .condition-item {
-            padding: 10px 15px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-            border-left: 4px solid #457b9d;
-            font-size: 0.95rem;
-        }
-        
-        .condition-item.active {
-            background-color: #a8dadc;
-            font-weight: 600;
-            border-left: 4px solid #e63946;
-        }
-        
         footer {
             text-align: center;
             padding: 20px;
@@ -212,35 +163,19 @@
                 </div>
                 
                 <div class="input-group">
-                    <label for="price">客单价 (元)</label>
+                    <label for="price">客单价（元/月）</label>
                     <input type="number" id="price" min="0" placeholder="输入客单价">
                 </div>
                 
                 <div class="input-group">
-                    <label for="cost">人工成本 (元)</label>
+                    <label for="cost">人工成本（元/月）</label>
                     <input type="number" id="cost" min="0" placeholder="输入成本">
                 </div>
             </div>
             
             <div class="result-section">
                 <h2 class="result-title">机构合约期内总利润</h2>
-                <div class="result-value" id="result">0 元</div>
-                
-                <div class="explanation">
-                    <h3>计算规则说明</h3>
-                    <p>系统将根据以下条件自动计算利润：</p>
-                    
-                    <div class="condition-list">
-                        <div class="condition-item" id="condition1">当 (报名人数×客单价 - 人工成本) 为负数 → 利润 = (报名人数×客单价 - 人工成本) × 80%</div>
-                        <div class="condition-item" id="condition2">当 (报名人数×客单价 - 人工成本) 为正数，且报名人数×客单价 ≤ 5000 → 利润 = (报名人数×客单价 - 人工成本) × 36</div>
-                        <div class="condition-item" id="condition3">当 (报名人数×客单价 - 人工成本) 为正数，报名人数×客单价 > 5000，且报名人数×客单价×36 > 500000 → 利润 = (报名人数×客单价×36×80%) - (人工成本×36)</div>
-                        <div class="condition-item" id="condition4">当 (报名人数×客单价 - 人工成本) 为正数，报名人数×客单价 > 5000，且400000＜报名人数×客单价×36≤500000 → 利润 = (报名人数×客单价×36×80%) - (人工成本×36) + (报名人数×客单价×36×20%×20%)</div>
-                        <div class="condition-item" id="condition5">当 (报名人数×客单价 - 人工成本) 为正数，报名人数×客单价 > 5000，且300000＜报名人数×客单价×36≤400000 → 利润 = (报名人数×客单价×36×80%) - (人工成本×36) + (报名人数×客单价×36×20%×40%)</div>
-                        <div class="condition-item" id="condition6">当 (报名人数×客单价 - 人工成本) 为正数，报名人数×客单价 > 5000，且200000＜报名人数×客单价×36≤300000 → 利润 = (报名人数×客单价×36×80%) - (人工成本×36) + (报名人数×客单价×36×20%×60%)</div>
-                        <div class="condition-item" id="condition7">当 (报名人数×客单价 - 人工成本) 为正数，报名人数×客单价 > 5000，且150000＜报名人数×客单价×36≤200000 → 利润 = (报名人数×客单价×36×80%) - (人工成本×36) + (报名人数×客单价×36×20%×80%)</div>
-                        <div class="condition-item" id="condition8">当 (报名人数×客单价 - 人工成本) 为正数，报名人数×客单价 > 5000，且报名人数×客单价×36 ≤ 150000 → 利润 = (报名人数×客单价×36×80%) - (人工成本×36) + (报名人数×客单价×36×20%×0%)</div>
-                    </div>
-                </div>
+                <div class="result-value" id="result">0</div>
             </div>
         </div>
         
@@ -255,7 +190,6 @@
         const priceInput = document.getElementById('price');
         const costInput = document.getElementById('cost');
         const resultElement = document.getElementById('result');
-        const conditionElements = document.querySelectorAll('.condition-item');
         
         // 添加事件监听器
         [participantsInput, priceInput, costInput].forEach(input => {
@@ -269,9 +203,6 @@
             const price = parseFloat(priceInput.value) || 0;
             const cost = parseFloat(costInput.value) || 0;
             
-            // 重置所有条件样式
-            conditionElements.forEach(el => el.classList.remove('active'));
-            
             // 计算X（即：报名人数*客单价 - 人工成本）
             const X = participants * price - cost;
             
@@ -282,17 +213,16 @@
             const totalRevenue = revenue * 36;
             
             let profit;
-            let activeCondition = null;
             
             // 规则1：X为负数
             if (X < 0) {
                 profit = X * 0.8;
-                activeCondition = 'condition1';
+                resultElement.textContent = profit.toFixed(2) + '元/月';
             } 
             // 规则2：X为正数，且收入≤5000
             else if (X >= 0 && revenue <= 5000) {
                 profit = X * 36;
-                activeCondition = 'condition2';
+                resultElement.textContent = profit.toFixed(2) + '元';
             }
             // 规则3-8：X为正数，且收入>5000
             else if (X >= 0 && revenue > 5000) {
@@ -301,38 +231,27 @@
                 
                 // 确定使用的规则
                 if (totalRevenue > 500000) {
-                    activeCondition = 'condition3';
+                    bonusRate = 0;
                 } else if (totalRevenue > 400000 && totalRevenue <= 500000) {
                     bonusRate = 0.2;
-                    activeCondition = 'condition4';
                 } else if (totalRevenue > 300000 && totalRevenue <= 400000) {
                     bonusRate = 0.4;
-                    activeCondition = 'condition5';
                 } else if (totalRevenue > 200000 && totalRevenue <= 300000) {
                     bonusRate = 0.6;
-                    activeCondition = 'condition6';
                 } else if (totalRevenue > 150000 && totalRevenue <= 200000) {
                     bonusRate = 0.8;
-                    activeCondition = 'condition7';
                 } else if (totalRevenue <= 150000) {
                     bonusRate = 0;
-                    activeCondition = 'condition8';
                 }
                 
                 const bonus = revenue * 36 * 0.2 * bonusRate;
                 profit = baseProfit + bonus;
+                resultElement.textContent = profit.toFixed(2) + '元';
             } 
             // 默认情况
             else {
                 profit = 0;
-            }
-            
-            // 显示结果
-            resultElement.textContent = profit.toFixed(2) + ' 元';
-            
-            // 高亮当前使用的规则
-            if (activeCondition) {
-                document.getElementById(activeCondition).classList.add('active');
+                resultElement.textContent = profit.toFixed(2) + '元';
             }
         }
         
